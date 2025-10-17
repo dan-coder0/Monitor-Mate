@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>MobileMonitor</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<!-- Permission descriptions for app monitoring features -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app analyzes location permissions of installed apps to assess privacy risks. Your location is not tracked or stored.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app analyzes camera permissions of installed apps to assess privacy risks. Your camera is not accessed directly.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app analyzes microphone permissions of installed apps to assess privacy risks. Your microphone is not accessed directly.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>This app analyzes contact permissions of installed apps to assess privacy risks. Your contacts are not accessed or stored.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This app analyzes calendar permissions of installed apps to assess privacy risks. Your calendar is not accessed or stored.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app analyzes photo library permissions of installed apps to assess privacy risks. Your photos are not accessed or stored.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This app analyzes motion sensor permissions of installed apps to assess privacy risks. Your motion data is not tracked or stored.</string>
+	
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+</dict>
+</plist>
