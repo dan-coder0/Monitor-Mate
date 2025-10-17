@@ -6,7 +6,7 @@ const RiskCategoryButton = ({ title, count, style, onPress }) => {
     const getIcon = () => {
         if (title.includes('High Risk')) return '🚨';
         if (title.includes('Medium Risk')) return '⚠️';
-        if (title.includes('Low Risk')) return '⚡';
+        if (title.includes('Low Risk')) return '#';
         if (title.includes('No Risk')) return '✅';
         return '📱';
     };
