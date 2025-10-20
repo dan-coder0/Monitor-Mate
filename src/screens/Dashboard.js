@@ -184,7 +184,7 @@ const DashboardScreen = () => {
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
-                    <Text style={styles.headerTitle}>Monitor Mate</Text>
+                    <Text style={styles.headerTitle}>Welcome to Monitor Mate</Text>
                 </View>
                 {/* <TouchableOpacity onPress={navigateToSettings} style={styles.profileIconContainer}>
                     <View style={styles.profileIcon}>
