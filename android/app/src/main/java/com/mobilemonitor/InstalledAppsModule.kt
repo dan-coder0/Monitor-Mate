@@ -31,73 +31,92 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
 
             for (packageInfo in installedPackages) {
                 val appInfo = packageInfo.applicationInfo ?: continue
-                // Skip system apps unless they are user-installed
-                if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0 ||
-                    (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+                
+                // Include all apps (both system and user-installed)
+                // Filter out only if app has no launcher icon (background services/components)
+                val launcherIntent = packageManager.getLaunchIntentForPackage(packageInfo.packageName)
+                if (launcherIntent == null) {
+                    // Skip apps without launcher activity (system components, services)
+                    continue
+                }
+                
+                val appInfoMap = WritableNativeMap()
+                
+                try {
+                    val appName = packageManager.getApplicationLabel(appInfo).toString()
+                    appInfoMap.putString("appName", appName)
+                    appInfoMap.putString("packageName", packageInfo.packageName)
+                    appInfoMap.putString("versionName", packageInfo.versionName ?: "Unknown")
+                    appInfoMap.putInt("versionCode", packageInfo.versionCode)
                     
-                    val appInfoMap = WritableNativeMap()
+                    // Get install date
+                    appInfoMap.putDouble("firstInstallTime", packageInfo.firstInstallTime.toDouble())
+                    appInfoMap.putDouble("lastUpdateTime", packageInfo.lastUpdateTime.toDouble())
                     
-                    try {
-                        val appName = packageManager.getApplicationLabel(appInfo).toString()
-                        appInfoMap.putString("appName", appName)
-                        appInfoMap.putString("packageName", packageInfo.packageName)
-                        appInfoMap.putString("versionName", packageInfo.versionName ?: "Unknown")
-                        appInfoMap.putInt("versionCode", packageInfo.versionCode)
-                        
-                        // Get install date
-                        appInfoMap.putDouble("firstInstallTime", packageInfo.firstInstallTime.toDouble())
-                        appInfoMap.putDouble("lastUpdateTime", packageInfo.lastUpdateTime.toDouble())
-                        
-                        // Get permissions
-                        val permissions = WritableNativeArray()
-                        packageInfo.requestedPermissions?.forEach { permission ->
-                            // Only include dangerous permissions that users should be aware of
-                            if (isDangerousPermission(permission)) {
-                                permissions.pushString(getSimplePermissionName(permission))
-                            }
+                    // Mark if it's a system app
+                    val isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+                    appInfoMap.putBoolean("isSystemApp", isSystemApp)
+                    
+                    // Get permissions
+                    val permissions = WritableNativeArray()
+                    packageInfo.requestedPermissions?.forEach { permission ->
+                        // Only include dangerous permissions that users should be aware of
+                        if (isDangerousPermission(permission)) {
+                            permissions.pushString(getSimplePermissionName(permission))
                         }
-                        appInfoMap.putArray("permissions", permissions)
-                        
-                        // Get app icon as base64
-                        try {
-                            val drawable = packageManager.getApplicationIcon(appInfo)
-                            val bitmap = drawableToBitmap(drawable)
-                            val base64Icon = bitmapToBase64(bitmap)
-                            appInfoMap.putString("icon", base64Icon)
-                        } catch (e: Exception) {
-                            appInfoMap.putString("icon", "default")
-                        }
-                        
-                        // Get app size information
-                        try {
-                            val sourceDir = appInfo.sourceDir
-                            val apkFile = java.io.File(sourceDir)
-                            val appSize = if (apkFile.exists()) apkFile.length() else 0L
-                            appInfoMap.putDouble("size", appSize.toDouble())
-                        } catch (e: Exception) {
-                            // Fallback: estimate size based on app type
-                            val estimatedSize = when {
-                                appName.contains("Game", ignoreCase = true) -> 100 * 1024 * 1024L // 100MB for games
-                                permissions.toArrayList().size > 5 -> 50 * 1024 * 1024L // 50MB for feature-rich apps
-                                else -> 25 * 1024 * 1024L // 25MB for simple apps
-                            }
-                            appInfoMap.putDouble("size", estimatedSize.toDouble())
-                        }
-                        
-                        // Try to get usage stats (requires special permission)
-                        val usageData = getUsageStatsDetailed(packageInfo.packageName)
-                        appInfoMap.putDouble("lastTimeUsed", usageData.first.toDouble())
-                        appInfoMap.putDouble("totalTimeInForeground", usageData.second.toDouble())
-                        appInfoMap.putInt("launchCount", usageData.third)
-                        
-                        apps.pushMap(appInfoMap)
-                    } catch (e: Exception) {
-                        // Skip this app if there's an error getting its info
-                        continue
                     }
+                    appInfoMap.putArray("permissions", permissions)
+                    
+                    // Get app icon as base64
+                    try {
+                        val drawable = packageManager.getApplicationIcon(appInfo)
+                        val bitmap = drawableToBitmap(drawable)
+                        val base64Icon = bitmapToBase64(bitmap)
+                        appInfoMap.putString("icon", base64Icon)
+                    } catch (e: Exception) {
+                        appInfoMap.putString("icon", "default")
+                    }
+                    
+                    // Get app size information
+                    try {
+                        val sourceDir = appInfo.sourceDir
+                        val apkFile = java.io.File(sourceDir)
+                        val appSize = if (apkFile.exists()) apkFile.length() else 0L
+                        appInfoMap.putDouble("size", appSize.toDouble())
+                    } catch (e: Exception) {
+                        // Fallback: estimate size based on app type
+                        val estimatedSize = when {
+                            appName.contains("Game", ignoreCase = true) -> 100 * 1024 * 1024L // 100MB for games
+                            permissions.toArrayList().size > 5 -> 50 * 1024 * 1024L // 50MB for feature-rich apps
+                            else -> 25 * 1024 * 1024L // 25MB for simple apps
+                        }
+                        appInfoMap.putDouble("size", estimatedSize.toDouble())
+                    }
+                    
+                    // Try to get usage stats (requires special permission)
+                    val usageData = getUsageStatsDetailed(packageInfo.packageName)
+                    var lastTimeUsed = usageData.first
+                    
+                    // If no usage data found, use lastUpdateTime as fallback
+                    // This ensures we show at least some timestamp for all apps
+                    if (lastTimeUsed == 0L) {
+                        lastTimeUsed = packageInfo.lastUpdateTime
+                        Log.d("InstalledAppsModule", "No usage stats for ${packageInfo.packageName}, using lastUpdateTime: $lastTimeUsed")
+                    }
+                    
+                    appInfoMap.putDouble("lastTimeUsed", lastTimeUsed.toDouble())
+                    appInfoMap.putDouble("totalTimeInForeground", usageData.second.toDouble())
+                    appInfoMap.putInt("launchCount", usageData.third)
+                    
+                    apps.pushMap(appInfoMap)
+                } catch (e: Exception) {
+                    // Skip this app if there's an error getting its info
+                    Log.w("InstalledAppsModule", "Error processing app ${packageInfo.packageName}: ${e.message}")
+                    continue
                 }
             }
             
+            Log.d("InstalledAppsModule", "Total apps retrieved: ${apps.size()}")
             promise.resolve(apps)
         } catch (e: Exception) {
             promise.reject("GET_APPS_ERROR", "Failed to get installed apps: ${e.message}", e)
@@ -183,25 +202,30 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             
             for (packageInfo in installedPackages) {
                 val appInfo = packageInfo.applicationInfo ?: continue
-                if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0 ||
-                    (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+                
+                // Only include apps with launcher intent
+                val launcherIntent = packageManager.getLaunchIntentForPackage(packageInfo.packageName)
+                if (launcherIntent == null) {
+                    continue
+                }
+                
+                try {
+                    val appUsage = WritableNativeMap()
+                    appUsage.putString("packageName", packageInfo.packageName)
+                    appUsage.putString("appName", packageManager.getApplicationLabel(appInfo).toString())
                     
-                    try {
-                        val appUsage = WritableNativeMap()
-                        appUsage.putString("packageName", packageInfo.packageName)
-                        appUsage.putString("appName", packageManager.getApplicationLabel(appInfo).toString())
-                        
-                        val networkUsage = getNetworkUsageForApp(packageInfo.packageName)
-                        appUsage.putMap("networkUsage", networkUsage)
-                        
-                        allUsage.pushMap(appUsage)
-                    } catch (e: Exception) {
-                        // Skip apps that we can't get usage for
-                        continue
-                    }
+                    val networkUsage = getNetworkUsageForApp(packageInfo.packageName)
+                    appUsage.putMap("networkUsage", networkUsage)
+                    
+                    allUsage.pushMap(appUsage)
+                } catch (e: Exception) {
+                    // Skip apps that we can't get usage for
+                    Log.w("InstalledAppsModule", "Error getting network usage for ${packageInfo.packageName}: ${e.message}")
+                    continue
                 }
             }
             
+            Log.d("InstalledAppsModule", "Total apps with network usage: ${allUsage.size()}")
             promise.resolve(allUsage)
         } catch (e: Exception) {
             promise.reject("ALL_NETWORK_USAGE_ERROR", "Failed to get all network usage: ${e.message}", e)
@@ -272,52 +296,79 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             }
 
             val usageStatsManager = reactApplicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-            val calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_YEAR, -7) // Look back 7 days for more recent data
-            val startTime = calendar.timeInMillis
             val endTime = System.currentTimeMillis()
-
-            // Try different intervals to get usage data
-            val intervals = arrayOf(
-                UsageStatsManager.INTERVAL_DAILY,
-                UsageStatsManager.INTERVAL_WEEKLY,
-                UsageStatsManager.INTERVAL_BEST
+            
+            // Try multiple time ranges - start with a very long period to capture any usage
+            val timeRanges = arrayOf(
+                365, // 1 year
+                180, // 6 months
+                90,  // 3 months
+                30,  // 1 month
+                7    // 1 week
             )
+            
+            // Try different intervals with different time ranges
+            for (days in timeRanges) {
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.DAY_OF_YEAR, -days)
+                val startTime = calendar.timeInMillis
+                
+                // Try INTERVAL_BEST first as it's most comprehensive
+                val intervals = arrayOf(
+                    UsageStatsManager.INTERVAL_BEST,
+                    UsageStatsManager.INTERVAL_DAILY,
+                    UsageStatsManager.INTERVAL_WEEKLY,
+                    UsageStatsManager.INTERVAL_MONTHLY,
+                    UsageStatsManager.INTERVAL_YEARLY
+                )
 
-            for (interval in intervals) {
-                try {
-                    val usageStatsList = usageStatsManager.queryUsageStats(interval, startTime, endTime)
-                    if (usageStatsList != null && usageStatsList.isNotEmpty()) {
-                        val usageStat = usageStatsList.find { it.packageName == packageName }
-                        if (usageStat != null && usageStat.lastTimeUsed > 0) {
-                            Log.d("InstalledAppsModule", "Found usage data for $packageName: lastTimeUsed=${usageStat.lastTimeUsed}")
-                            return usageStat.lastTimeUsed
+                for (interval in intervals) {
+                    try {
+                        val usageStatsList = usageStatsManager.queryUsageStats(interval, startTime, endTime)
+                        if (usageStatsList != null && usageStatsList.isNotEmpty()) {
+                            // Find stats for this specific package
+                            val usageStat = usageStatsList.find { it.packageName == packageName }
+                            if (usageStat != null && usageStat.lastTimeUsed > 0) {
+                                Log.d("InstalledAppsModule", "Found usage data for $packageName (${days}d, interval=$interval): lastTimeUsed=${usageStat.lastTimeUsed}")
+                                return usageStat.lastTimeUsed
+                            }
                         }
+                    } catch (e: Exception) {
+                        Log.w("InstalledAppsModule", "Error querying usage stats with interval $interval for $days days", e)
+                        continue
                     }
-                } catch (e: Exception) {
-                    Log.w("InstalledAppsModule", "Error querying usage stats with interval $interval", e)
-                    continue
                 }
             }
-
-            // If no usage found, try a longer period (30 days)
-            calendar.add(Calendar.DAY_OF_YEAR, -23) // Total 30 days back
-            val longerStartTime = calendar.timeInMillis
             
+            // Last resort: try querying with events API which can be more reliable on some devices
             try {
-                val usageStatsList = usageStatsManager.queryUsageStats(
-                    UsageStatsManager.INTERVAL_MONTHLY,
-                    longerStartTime,
-                    endTime
-                )
-                val usageStat = usageStatsList?.find { it.packageName == packageName }
-                val lastUsed = usageStat?.lastTimeUsed ?: 0L
-                Log.d("InstalledAppsModule", "Usage stats for $packageName over 30 days: lastTimeUsed=$lastUsed")
-                return lastUsed
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.YEAR, -1) // Look back 1 year
+                val events = usageStatsManager.queryEvents(calendar.timeInMillis, endTime)
+                var lastTimeUsed = 0L
+                
+                while (events.hasNextEvent()) {
+                    val event = android.app.usage.UsageEvents.Event()
+                    events.getNextEvent(event)
+                    
+                    if (event.packageName == packageName) {
+                        // Track the most recent event
+                        if (event.timeStamp > lastTimeUsed) {
+                            lastTimeUsed = event.timeStamp
+                        }
+                    }
+                }
+                
+                if (lastTimeUsed > 0) {
+                    Log.d("InstalledAppsModule", "Found usage via events API for $packageName: lastTimeUsed=$lastTimeUsed")
+                    return lastTimeUsed
+                }
             } catch (e: Exception) {
-                Log.w("InstalledAppsModule", "Error querying monthly usage stats for $packageName", e)
-                return 0L
+                Log.w("InstalledAppsModule", "Error querying events for $packageName", e)
             }
+
+            Log.d("InstalledAppsModule", "No usage data found for $packageName")
+            return 0L
         } catch (e: Exception) {
             Log.e("InstalledAppsModule", "Error getting usage stats for $packageName", e)
             0L
@@ -331,37 +382,109 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             }
 
             val usageStatsManager = reactApplicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-            val calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_YEAR, -7)
-            val startTime = calendar.timeInMillis
             val endTime = System.currentTimeMillis()
-
-            val usageStatsList = usageStatsManager.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY,
-                startTime,
-                endTime
-            )
-
-            val usageStat = usageStatsList?.find { it.packageName == packageName }
-            if (usageStat != null) {
-                val lastTimeUsed = usageStat.lastTimeUsed
-                val totalTimeInForeground = usageStat.totalTimeInForeground
+            
+            var lastTimeUsed = 0L
+            var totalTimeInForeground = 0L
+            var launchCount = 0
+            
+            // Try multiple time ranges to find usage data
+            val timeRanges = arrayOf(365, 180, 90, 30, 7) // days
+            
+            for (days in timeRanges) {
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.DAY_OF_YEAR, -days)
+                val startTime = calendar.timeInMillis
                 
-                // Get launch count using events
-                val events = usageStatsManager.queryEvents(startTime, endTime)
-                var launchCount = 0
-                while (events.hasNextEvent()) {
-                    val event = android.app.usage.UsageEvents.Event()
-                    events.getNextEvent(event)
-                    if (event.packageName == packageName && 
-                        event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED) {
-                        launchCount++
+                // Try different intervals
+                val intervals = arrayOf(
+                    UsageStatsManager.INTERVAL_BEST,
+                    UsageStatsManager.INTERVAL_DAILY,
+                    UsageStatsManager.INTERVAL_WEEKLY
+                )
+                
+                for (interval in intervals) {
+                    try {
+                        val usageStatsList = usageStatsManager.queryUsageStats(interval, startTime, endTime)
+                        
+                        if (usageStatsList != null && usageStatsList.isNotEmpty()) {
+                            // Aggregate usage stats for this package
+                            val relevantStats = usageStatsList.filter { it.packageName == packageName }
+                            
+                            if (relevantStats.isNotEmpty()) {
+                                // Get the most recent lastTimeUsed
+                                lastTimeUsed = relevantStats.maxOfOrNull { it.lastTimeUsed } ?: 0L
+                                
+                                // Sum up total time in foreground
+                                totalTimeInForeground = relevantStats.sumOf { it.totalTimeInForeground }
+                                
+                                // If we found valid data, break out of interval loop
+                                if (lastTimeUsed > 0) {
+                                    break
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.w("InstalledAppsModule", "Error querying detailed stats with interval $interval for $days days", e)
+                        continue
                     }
                 }
                 
-                return Triple(lastTimeUsed, totalTimeInForeground, launchCount)
+                // If we found lastTimeUsed, now get launch count from events
+                if (lastTimeUsed > 0) {
+                    try {
+                        // Query events for the same period
+                        val events = usageStatsManager.queryEvents(startTime, endTime)
+                        while (events.hasNextEvent()) {
+                            val event = android.app.usage.UsageEvents.Event()
+                            events.getNextEvent(event)
+                            if (event.packageName == packageName && 
+                                event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED) {
+                                launchCount++
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.w("InstalledAppsModule", "Error counting launches for $packageName", e)
+                    }
+                    
+                    Log.d("InstalledAppsModule", "Detailed stats for $packageName: lastTimeUsed=$lastTimeUsed, foreground=$totalTimeInForeground, launches=$launchCount")
+                    return Triple(lastTimeUsed, totalTimeInForeground, launchCount)
+                }
             }
             
+            // Last resort: try events API directly
+            if (lastTimeUsed == 0L) {
+                try {
+                    val calendar = Calendar.getInstance()
+                    calendar.add(Calendar.YEAR, -1)
+                    val startTime = calendar.timeInMillis
+                    val events = usageStatsManager.queryEvents(startTime, endTime)
+                    
+                    while (events.hasNextEvent()) {
+                        val event = android.app.usage.UsageEvents.Event()
+                        events.getNextEvent(event)
+                        
+                        if (event.packageName == packageName) {
+                            if (event.timeStamp > lastTimeUsed) {
+                                lastTimeUsed = event.timeStamp
+                            }
+                            
+                            if (event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED) {
+                                launchCount++
+                            }
+                        }
+                    }
+                    
+                    if (lastTimeUsed > 0) {
+                        Log.d("InstalledAppsModule", "Found usage via events for $packageName: lastTimeUsed=$lastTimeUsed, launches=$launchCount")
+                        return Triple(lastTimeUsed, totalTimeInForeground, launchCount)
+                    }
+                } catch (e: Exception) {
+                    Log.w("InstalledAppsModule", "Error querying events for detailed stats", e)
+                }
+            }
+            
+            Log.d("InstalledAppsModule", "No detailed usage data found for $packageName")
             Triple(0L, 0L, 0)
         } catch (e: Exception) {
             Log.e("InstalledAppsModule", "Error getting detailed usage stats for $packageName", e)
