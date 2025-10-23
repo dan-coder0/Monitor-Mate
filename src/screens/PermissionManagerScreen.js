@@ -193,7 +193,7 @@ const PermissionManagerScreen = () => {
                                 {getRiskLabel(permissionAnalysis.riskLevel)}
                             </Text>
                             <Text style={styles.riskScore}>
-                                Risk Score: {permissionAnalysis.riskScore}/15
+                                Risk Score: {permissionAnalysis.riskScore}
                             </Text>
                         </View>
                     )}
