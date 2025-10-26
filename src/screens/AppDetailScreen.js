@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     View,
     Text,
@@ -12,9 +12,11 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { PermissionService } from '../services/PermissionService';
+import { useAppInfo } from '../hooks/useAppInfo';
 
 const AppDetailScreen = ({ route }) => {
     const navigation = useNavigation();
+    const { analyzeAppPermissions } = useAppInfo();
 
     // Get app data from route params or use default data
     const appData = route?.params?.appData || {
@@ -113,7 +115,10 @@ const AppDetailScreen = ({ route }) => {
     const formattedInstallDate = formatInstallDate(appData.firstInstallTime);
     const formattedUsageStats = formatUsageStats(appData);
 
-
+    // Analyze app permissions
+    const permissionAnalysis = useMemo(() => {
+        return analyzeAppPermissions(appData.permissions || []);
+    }, [appData.permissions, analyzeAppPermissions]);
 
     const navigateBack = () => {
         navigation.goBack();
@@ -121,6 +126,35 @@ const AppDetailScreen = ({ route }) => {
 
     const navigateToAllPermissions = () => {
         navigation.navigate('PermissionManagerScreen', { appData });
+    };
+
+    const getRiskColor = (riskLevel) => {
+        switch (riskLevel) {
+            case 'HIGH_RISK':
+            case 'HIGH':
+                return '#ff4757';
+            case 'MEDIUM_RISK':
+            case 'MEDIUM':
+                return '#ffa502';
+            case 'LOW_RISK':
+            case 'LOW':
+                return '#ffb142';
+            default:
+                return '#2ed573';
+        }
+    };
+
+    const getRiskLabel = (riskLevel) => {
+        switch (riskLevel) {
+            case 'HIGH_RISK':
+                return 'High Risk';
+            case 'MEDIUM_RISK':
+                return 'Medium Risk';
+            case 'LOW_RISK':
+                return 'Low Risk';
+            default:
+                return 'Safe';
+        }
     };
 
     const getRiskLevelColor = (riskLevel) => {
@@ -218,6 +252,18 @@ const AppDetailScreen = ({ route }) => {
                     {formattedInstallDate !== 'Unknown' && (
                         <View style={styles.cardRowBetween}><Text style={styles.label}>Install Date</Text><Text style={styles.value}>{formattedInstallDate}</Text></View>
                     )}
+                    <View style={styles.riskSummary}>
+                        <Text style={styles.riskSummaryTitle}>Risk Assessment</Text>
+                        <Text style={[
+                            styles.overallRisk,
+                            { color: getRiskColor(permissionAnalysis.riskLevel) },
+                        ]}>
+                            {getRiskLabel(permissionAnalysis.riskLevel)}
+                        </Text>
+                        <Text style={styles.riskScore}>
+                            Risk Score: {permissionAnalysis.riskScore}
+                        </Text>
+                    </View>
                 </View>
                 {/* Permissions Card */}
                 <View style={styles.card}>
@@ -251,9 +297,9 @@ const AppDetailScreen = ({ route }) => {
                             );
                         })}
                     </View>
-                    <TouchableOpacity onPress={navigateToAllPermissions} style={styles.viewAllButtonModern} activeOpacity={0.8}>
+                    {/* <TouchableOpacity onPress={navigateToAllPermissions} style={styles.viewAllButtonModern} activeOpacity={0.8}>
                         <Text style={styles.viewAllButtonTextModern}>View All Permissions</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 {/* Network Activity Card */}
                 <View style={styles.card}>
@@ -540,6 +586,29 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: '#007AFF',
         fontWeight: '600',
+    },
+    // Risk Summary
+    riskSummary: {
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#e9ecef',
+    },
+    riskSummaryTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 8,
+    },
+    overallRisk: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    riskScore: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#666',
     },
     // Modern Bottom NavBar
     bottomNavBarModern: {

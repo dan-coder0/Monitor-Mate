@@ -243,6 +243,12 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             permission.contains("CALENDAR") -> true
             permission.contains("STORAGE") || permission.contains("READ_EXTERNAL") || permission.contains("WRITE_EXTERNAL") -> true
             permission.contains("BODY_SENSORS") -> true
+            permission.contains("PACKAGE_USAGE_STATS") -> true
+            permission.contains("CALL_LOG") -> true
+            permission.contains("ACTIVITY_RECOGNITION") -> true
+            permission.contains("POST_NOTIFICATIONS") -> true
+            permission.contains("BLUETOOTH") && (permission.contains("SCAN") || permission.contains("CONNECT") || permission.contains("ADVERTISE")) -> true
+            permission.contains("NEARBY_DEVICES") -> true
             else -> false
         }
     }
@@ -258,6 +264,12 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             permission.contains("READ_CALENDAR") || permission.contains("WRITE_CALENDAR") -> "CALENDAR"
             permission.contains("READ_EXTERNAL_STORAGE") || permission.contains("WRITE_EXTERNAL_STORAGE") -> "STORAGE"
             permission.contains("BODY_SENSORS") -> "SENSORS"
+            permission.contains("PACKAGE_USAGE_STATS") -> "USAGE_ACCESS"
+            permission.contains("READ_CALL_LOG") || permission.contains("WRITE_CALL_LOG") -> "CALL_LOG"
+            permission.contains("ACTIVITY_RECOGNITION") -> "ACTIVITY_RECOGNITION"
+            permission.contains("POST_NOTIFICATIONS") -> "NOTIFICATIONS"
+            permission.contains("BLUETOOTH_SCAN") || permission.contains("BLUETOOTH_CONNECT") || permission.contains("BLUETOOTH_ADVERTISE") -> "BLUETOOTH"
+            permission.contains("NEARBY_DEVICES") -> "NEARBY_DEVICES"
             else -> permission.substringAfterLast(".")
         }
     }
@@ -273,6 +285,12 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             permission.contains("CALENDAR") -> "Access to calendar events"
             permission.contains("STORAGE") -> "Access to files stored on the device"
             permission.contains("BODY_SENSORS") -> "Access to body sensors like heart rate monitors"
+            permission.contains("PACKAGE_USAGE_STATS") -> "Access to app usage statistics and screen time data"
+            permission.contains("CALL_LOG") -> "Access to call history and phone logs"
+            permission.contains("ACTIVITY_RECOGNITION") -> "Access to physical activity and step tracking"
+            permission.contains("POST_NOTIFICATIONS") -> "Ability to show notifications"
+            permission.contains("BLUETOOTH") -> "Access to nearby Bluetooth devices"
+            permission.contains("NEARBY_DEVICES") -> "Access to nearby Wi-Fi and Bluetooth devices"
             else -> "System permission"
         }
     }
@@ -281,8 +299,14 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
         return when {
             permission.contains("CAMERA") || permission.contains("LOCATION") || permission.contains("RECORD_AUDIO") -> "HIGH"
             permission.contains("CONTACTS") || permission.contains("PHONE") || permission.contains("SMS") -> "HIGH"
+            permission.contains("CALL_LOG") -> "HIGH"
             permission.contains("STORAGE") || permission.contains("CALENDAR") -> "MEDIUM"
             permission.contains("BODY_SENSORS") -> "MEDIUM"
+            permission.contains("PACKAGE_USAGE_STATS") -> "MEDIUM"
+            permission.contains("ACTIVITY_RECOGNITION") -> "MEDIUM"
+            permission.contains("POST_NOTIFICATIONS") -> "LOW"
+            permission.contains("BLUETOOTH") -> "MEDIUM"
+            permission.contains("NEARBY_DEVICES") -> "MEDIUM"
             else -> "LOW"
         }
     }

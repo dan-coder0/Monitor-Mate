@@ -55,6 +55,36 @@ export class PermissionService {
             description: 'Can access body sensors and health data',
             category: 'Health Data',
         },
+        USAGE_ACCESS: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access app usage statistics and screen time data',
+            category: 'Privacy Monitoring',
+        },
+        CALL_LOG: {
+            level: PermissionService.RISK_LEVELS.HIGH,
+            description: 'Can access call history and phone logs',
+            category: 'Privacy Critical',
+        },
+        ACTIVITY_RECOGNITION: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access physical activity and step tracking',
+            category: 'Health Data',
+        },
+        NOTIFICATIONS: {
+            level: PermissionService.RISK_LEVELS.LOW,
+            description: 'Can show notifications on your device',
+            category: 'User Experience',
+        },
+        BLUETOOTH: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access nearby Bluetooth devices',
+            category: 'Device Access',
+        },
+        NEARBY_DEVICES: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access nearby Wi-Fi and Bluetooth devices',
+            category: 'Device Access',
+        },
     };
 
     /**
@@ -166,7 +196,7 @@ export class PermissionService {
             case this.RISK_LEVELS.LOW:
                 return `ℹ️ Low Risk: ${permission.toLowerCase()} access is generally safe for this type of app.`;
             default:
-                return `✅ Safe: This permission is typically safe.`;
+                return '✅ Safe: This permission is typically safe.';
         }
     }
 
@@ -259,9 +289,6 @@ export class PermissionService {
         try {
             const permissions = {};
             // Check permissions that exist in the PermissionsAndroid module
-            if (PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE) {
-                permissions.readPhoneState = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE);
-            }
             if (PermissionsAndroid.PERMISSIONS.ACCESS_NETWORK_STATE) {
                 permissions.accessNetworkState = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_NETWORK_STATE);
             }
@@ -283,9 +310,6 @@ export class PermissionService {
         try {
             const permissionsToRequest = [];
             // Only request permissions that exist
-            if (PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE) {
-                permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE);
-            }
             if (PermissionsAndroid.PERMISSIONS.ACCESS_NETWORK_STATE) {
                 permissionsToRequest.push(PermissionsAndroid.PERMISSIONS.ACCESS_NETWORK_STATE);
             }
@@ -322,6 +346,12 @@ export class PermissionService {
             case 'STORAGE': return '💾';
             case 'CALENDAR': return '📅';
             case 'SENSORS': return '⌚';
+            case 'USAGE_ACCESS': return '📊';
+            case 'CALL_LOG': return '📋';
+            case 'ACTIVITY_RECOGNITION': return '🏃';
+            case 'NOTIFICATIONS': return '🔔';
+            case 'BLUETOOTH': return '📡';
+            case 'NEARBY_DEVICES': return '📶';
             default: return '⚙️';
         }
     }
