@@ -242,13 +242,28 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             permission.contains("SMS") -> true
             permission.contains("CALENDAR") -> true
             permission.contains("STORAGE") || permission.contains("READ_EXTERNAL") || permission.contains("WRITE_EXTERNAL") -> true
+            permission.contains("READ_MEDIA_IMAGES") || permission.contains("READ_MEDIA_VIDEO") || permission.contains("READ_MEDIA_AUDIO") -> true
+            permission.contains("READ_MEDIA_VISUAL") || permission.contains("ACCESS_MEDIA_LOCATION") -> true
+            permission.contains("MANAGE_EXTERNAL_STORAGE") -> true
+            permission.contains("MANAGE_DOCUMENTS") -> true
+            permission.contains("MANAGE_MEDIA") -> true
+            permission.contains("WRITE_MEDIA_STORAGE") -> true
             permission.contains("BODY_SENSORS") -> true
             permission.contains("PACKAGE_USAGE_STATS") -> true
             permission.contains("CALL_LOG") -> true
             permission.contains("ACTIVITY_RECOGNITION") -> true
             permission.contains("POST_NOTIFICATIONS") -> true
             permission.contains("BLUETOOTH") && (permission.contains("SCAN") || permission.contains("CONNECT") || permission.contains("ADVERTISE")) -> true
-            permission.contains("NEARBY_DEVICES") -> true
+            permission.contains("NEARBY_DEVICES") || permission.contains("NEARBY_WIFI") -> true
+            permission.contains("health.READ") || permission.contains("health.WRITE") -> true
+            permission.contains("GET_ACCOUNTS") -> true
+            permission.contains("READ_PHONE_NUMBERS") -> true
+            permission.contains("ACCEPT_HANDOVER") || permission.contains("ANSWER_PHONE_CALLS") -> true
+            permission.contains("USE_SIP") -> true
+            permission.contains("PROCESS_OUTGOING_CALLS") -> true
+            permission.contains("ACCESS_BACKGROUND_LOCATION") -> true
+            permission.contains("BODY_SENSORS_BACKGROUND") -> true
+            permission.contains("UWB_RANGING") -> true
             else -> false
         }
     }
@@ -263,13 +278,30 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             permission.contains("SEND_SMS") || permission.contains("READ_SMS") -> "SMS"
             permission.contains("READ_CALENDAR") || permission.contains("WRITE_CALENDAR") -> "CALENDAR"
             permission.contains("READ_EXTERNAL_STORAGE") || permission.contains("WRITE_EXTERNAL_STORAGE") -> "STORAGE"
+            permission.contains("READ_MEDIA_IMAGES") || permission.contains("READ_MEDIA_VISUAL") -> "PHOTOS"
+            permission.contains("READ_MEDIA_VIDEO") -> "VIDEOS"
+            permission.contains("READ_MEDIA_AUDIO") -> "MUSIC"
+            permission.contains("ACCESS_MEDIA_LOCATION") -> "MEDIA_LOCATION"
+            permission.contains("MANAGE_EXTERNAL_STORAGE") -> "FILE_MANAGER"
+            permission.contains("MANAGE_DOCUMENTS") -> "FILE_MANAGER"
+            permission.contains("MANAGE_MEDIA") -> "FILE_MANAGER"
+            permission.contains("WRITE_MEDIA_STORAGE") -> "FILE_MANAGER"
             permission.contains("BODY_SENSORS") -> "SENSORS"
             permission.contains("PACKAGE_USAGE_STATS") -> "USAGE_ACCESS"
             permission.contains("READ_CALL_LOG") || permission.contains("WRITE_CALL_LOG") -> "CALL_LOG"
             permission.contains("ACTIVITY_RECOGNITION") -> "ACTIVITY_RECOGNITION"
             permission.contains("POST_NOTIFICATIONS") -> "NOTIFICATIONS"
             permission.contains("BLUETOOTH_SCAN") || permission.contains("BLUETOOTH_CONNECT") || permission.contains("BLUETOOTH_ADVERTISE") -> "BLUETOOTH"
-            permission.contains("NEARBY_DEVICES") -> "NEARBY_DEVICES"
+            permission.contains("NEARBY_DEVICES") || permission.contains("NEARBY_WIFI") -> "NEARBY_DEVICES"
+            permission.contains("health.READ") || permission.contains("health.WRITE") -> "HEALTH_DATA"
+            permission.contains("GET_ACCOUNTS") -> "ACCOUNTS"
+            permission.contains("READ_PHONE_NUMBERS") -> "PHONE_NUMBERS"
+            permission.contains("ACCEPT_HANDOVER") || permission.contains("ANSWER_PHONE_CALLS") -> "CALL_CONTROL"
+            permission.contains("USE_SIP") -> "VOIP"
+            permission.contains("PROCESS_OUTGOING_CALLS") -> "CALL_MONITORING"
+            permission.contains("ACCESS_BACKGROUND_LOCATION") -> "BACKGROUND_LOCATION"
+            permission.contains("BODY_SENSORS_BACKGROUND") -> "SENSORS_BACKGROUND"
+            permission.contains("UWB_RANGING") -> "UWB"
             else -> permission.substringAfterLast(".")
         }
     }
@@ -284,13 +316,30 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             permission.contains("SMS") -> "Access to SMS messages"
             permission.contains("CALENDAR") -> "Access to calendar events"
             permission.contains("STORAGE") -> "Access to files stored on the device"
+            permission.contains("READ_MEDIA_IMAGES") || permission.contains("READ_MEDIA_VISUAL") -> "Access to photos and images on the device (Android 13+)"
+            permission.contains("READ_MEDIA_VIDEO") -> "Access to videos on the device (Android 13+)"
+            permission.contains("READ_MEDIA_AUDIO") -> "Access to audio files and music on the device (Android 13+)"
+            permission.contains("ACCESS_MEDIA_LOCATION") -> "Access to photo/video location metadata"
+            permission.contains("MANAGE_EXTERNAL_STORAGE") -> "Full access to all files on device storage"
+            permission.contains("MANAGE_DOCUMENTS") -> "Full file management access (Documents provider)"
+            permission.contains("MANAGE_MEDIA") -> "Manage and modify media files on device"
+            permission.contains("WRITE_MEDIA_STORAGE") -> "Write access to shared media storage"
             permission.contains("BODY_SENSORS") -> "Access to body sensors like heart rate monitors"
             permission.contains("PACKAGE_USAGE_STATS") -> "Access to app usage statistics and screen time data"
             permission.contains("CALL_LOG") -> "Access to call history and phone logs"
             permission.contains("ACTIVITY_RECOGNITION") -> "Access to physical activity and step tracking"
             permission.contains("POST_NOTIFICATIONS") -> "Ability to show notifications"
             permission.contains("BLUETOOTH") -> "Access to nearby Bluetooth devices"
-            permission.contains("NEARBY_DEVICES") -> "Access to nearby Wi-Fi and Bluetooth devices"
+            permission.contains("NEARBY_DEVICES") || permission.contains("NEARBY_WIFI") -> "Access to nearby Wi-Fi and Bluetooth devices"
+            permission.contains("health.READ") || permission.contains("health.WRITE") -> "Access to health and fitness data (steps, heart rate, sleep, etc.)"
+            permission.contains("GET_ACCOUNTS") -> "Access to accounts on the device"
+            permission.contains("READ_PHONE_NUMBERS") -> "Access to device phone numbers"
+            permission.contains("ACCEPT_HANDOVER") || permission.contains("ANSWER_PHONE_CALLS") -> "Ability to answer incoming calls"
+            permission.contains("USE_SIP") -> "Make and receive internet calls (VoIP)"
+            permission.contains("PROCESS_OUTGOING_CALLS") -> "Monitor and control outgoing calls"
+            permission.contains("ACCESS_BACKGROUND_LOCATION") -> "Track your location even when app is closed"
+            permission.contains("BODY_SENSORS_BACKGROUND") -> "Access body sensors in the background"
+            permission.contains("UWB_RANGING") -> "Precise device positioning using ultra-wideband"
             else -> "System permission"
         }
     }
@@ -300,13 +349,28 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) : ReactContextB
             permission.contains("CAMERA") || permission.contains("LOCATION") || permission.contains("RECORD_AUDIO") -> "HIGH"
             permission.contains("CONTACTS") || permission.contains("PHONE") || permission.contains("SMS") -> "HIGH"
             permission.contains("CALL_LOG") -> "HIGH"
+            permission.contains("MANAGE_EXTERNAL_STORAGE") -> "HIGH"
+            permission.contains("MANAGE_DOCUMENTS") -> "HIGH"
+            permission.contains("MANAGE_MEDIA") -> "HIGH"
+            permission.contains("WRITE_MEDIA_STORAGE") -> "HIGH"
             permission.contains("STORAGE") || permission.contains("CALENDAR") -> "MEDIUM"
+            permission.contains("READ_MEDIA_IMAGES") || permission.contains("READ_MEDIA_VIDEO") || permission.contains("READ_MEDIA_AUDIO") -> "MEDIUM"
+            permission.contains("READ_MEDIA_VISUAL") || permission.contains("ACCESS_MEDIA_LOCATION") -> "MEDIUM"
             permission.contains("BODY_SENSORS") -> "MEDIUM"
             permission.contains("PACKAGE_USAGE_STATS") -> "MEDIUM"
             permission.contains("ACTIVITY_RECOGNITION") -> "MEDIUM"
             permission.contains("POST_NOTIFICATIONS") -> "LOW"
             permission.contains("BLUETOOTH") -> "MEDIUM"
-            permission.contains("NEARBY_DEVICES") -> "MEDIUM"
+            permission.contains("NEARBY_DEVICES") || permission.contains("NEARBY_WIFI") -> "MEDIUM"
+            permission.contains("health.READ") || permission.contains("health.WRITE") -> "HIGH"
+            permission.contains("GET_ACCOUNTS") -> "MEDIUM"
+            permission.contains("READ_PHONE_NUMBERS") -> "HIGH"
+            permission.contains("ACCEPT_HANDOVER") || permission.contains("ANSWER_PHONE_CALLS") -> "HIGH"
+            permission.contains("USE_SIP") -> "MEDIUM"
+            permission.contains("PROCESS_OUTGOING_CALLS") -> "HIGH"
+            permission.contains("ACCESS_BACKGROUND_LOCATION") -> "HIGH"
+            permission.contains("BODY_SENSORS_BACKGROUND") -> "MEDIUM"
+            permission.contains("UWB_RANGING") -> "MEDIUM"
             else -> "LOW"
         }
     }

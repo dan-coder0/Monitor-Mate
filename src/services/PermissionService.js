@@ -45,6 +45,31 @@ export class PermissionService {
             description: 'Can access files and photos on your device',
             category: 'Data Access',
         },
+        PHOTOS: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access photos and images on your device (Android 13+)',
+            category: 'Data Access',
+        },
+        VIDEOS: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access videos on your device (Android 13+)',
+            category: 'Data Access',
+        },
+        MUSIC: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access audio files and music on your device (Android 13+)',
+            category: 'Data Access',
+        },
+        FILE_MANAGER: {
+            level: PermissionService.RISK_LEVELS.HIGH,
+            description: 'Can access all files on your device storage',
+            category: 'Privacy Critical',
+        },
+        MEDIA_LOCATION: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access location information from photos and videos',
+            category: 'Data Access',
+        },
         CALENDAR: {
             level: PermissionService.RISK_LEVELS.MEDIUM,
             description: 'Can view and modify your calendar events',
@@ -83,6 +108,51 @@ export class PermissionService {
         NEARBY_DEVICES: {
             level: PermissionService.RISK_LEVELS.MEDIUM,
             description: 'Can access nearby Wi-Fi and Bluetooth devices',
+            category: 'Device Access',
+        },
+        HEALTH_DATA: {
+            level: PermissionService.RISK_LEVELS.HIGH,
+            description: 'Can access health and fitness data (steps, heart rate, sleep, etc.)',
+            category: 'Privacy Critical',
+        },
+        ACCOUNTS: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access accounts on the device',
+            category: 'Personal Data',
+        },
+        PHONE_NUMBERS: {
+            level: PermissionService.RISK_LEVELS.HIGH,
+            description: 'Can access device phone numbers',
+            category: 'Privacy Critical',
+        },
+        CALL_CONTROL: {
+            level: PermissionService.RISK_LEVELS.HIGH,
+            description: 'Can answer incoming calls',
+            category: 'Privacy Critical',
+        },
+        VOIP: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can make and receive internet calls (VoIP)',
+            category: 'Communications',
+        },
+        CALL_MONITORING: {
+            level: PermissionService.RISK_LEVELS.HIGH,
+            description: 'Can monitor and control outgoing calls',
+            category: 'Privacy Critical',
+        },
+        BACKGROUND_LOCATION: {
+            level: PermissionService.RISK_LEVELS.HIGH,
+            description: 'Can track your location even when app is closed',
+            category: 'Privacy Critical',
+        },
+        SENSORS_BACKGROUND: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can access body sensors in the background',
+            category: 'Health Data',
+        },
+        UWB: {
+            level: PermissionService.RISK_LEVELS.MEDIUM,
+            description: 'Can use precise device positioning using ultra-wideband',
             category: 'Device Access',
         },
     };
@@ -344,6 +414,11 @@ export class PermissionService {
             case 'PHONE': return '📞';
             case 'SMS': return '💬';
             case 'STORAGE': return '💾';
+            case 'PHOTOS': return '🖼️';
+            case 'VIDEOS': return '🎥';
+            case 'MUSIC': return '🎵';
+            case 'FILE_MANAGER': return '📁';
+            case 'MEDIA_LOCATION': return '🗺️';
             case 'CALENDAR': return '📅';
             case 'SENSORS': return '⌚';
             case 'USAGE_ACCESS': return '📊';
@@ -352,6 +427,15 @@ export class PermissionService {
             case 'NOTIFICATIONS': return '🔔';
             case 'BLUETOOTH': return '📡';
             case 'NEARBY_DEVICES': return '📶';
+            case 'HEALTH_DATA': return '❤️';
+            case 'ACCOUNTS': return '👤';
+            case 'PHONE_NUMBERS': return '🔢';
+            case 'CALL_CONTROL': return '☎️';
+            case 'VOIP': return '📞';
+            case 'CALL_MONITORING': return '📲';
+            case 'BACKGROUND_LOCATION': return '🗺️';
+            case 'SENSORS_BACKGROUND': return '⌚';
+            case 'UWB': return '📡';
             default: return '⚙️';
         }
     }
