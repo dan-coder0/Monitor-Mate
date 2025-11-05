@@ -1,8 +1,8 @@
-# Monitor Mate - Production Ready
+# Mobile Monitor - Production Ready
 
 A comprehensive React Native application for monitoring mobile app security, permissions, and usage patterns.
 
-## ✅ Status
+## ✅ Production Status
 
 - **Real data validation**: Comprehensive data validation and sanitization
 - **Error handling**: Production-grade error boundaries and fallbacks  
@@ -12,6 +12,11 @@ A comprehensive React Native application for monitoring mobile app security, per
 ## 🚀 Quick Start
 
 > **Note**: Make sure you have completed the [React Native Environment Setup](https://reactnative.dev/docs/set-up-your-environment) guide.
+
+### Prerequisites for Production
+- **Native Module Required**: Custom implementation of `InstalledApps` module
+- **System Permissions**: Platform-specific app monitoring permissions
+- **See**: [Production Deployment Guide](./PRODUCTION_DEPLOYMENT_GUIDE.md) for details
 
 ### Development Setup
 
@@ -69,6 +74,13 @@ For more information, please visit [CocoaPods Getting Started guide](https://gui
 - Real app data from device
 - Complete security analysis
 - All features operational
+
+## 📖 Documentation
+
+- **[Production Deployment Guide](./PRODUCTION_DEPLOYMENT_GUIDE.md)**: Complete production setup
+- **[Technical Documentation](./TECHNICAL_DOCUMENTATION.md)**: Architecture and implementation
+- **[Complete Documentation](./COMPLETE_DOCUMENTATION.md)**: Comprehensive feature guide
+- **[User Guide](./USER_GUIDE.md)**: End-user functionality guide
 
 ## 🔐 Security & Privacy
 

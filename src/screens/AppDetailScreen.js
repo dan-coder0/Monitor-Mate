@@ -290,9 +290,9 @@ const AppDetailScreen = ({ route }) => {
                                             {permissionRisk?.description || 'System permission'}
                                         </Text>
                                     </View>
-                                    <View style={[styles.riskIndicator, { backgroundColor: getRiskColorForLevel(riskLevel) }]}>
+                                    {/* <View style={[styles.riskIndicator, { backgroundColor: getRiskColorForLevel(riskLevel) }]}>
                                         <Text style={styles.riskIndicatorText}>{riskLevel}</Text>
-                                    </View>
+                                    </View> */}
                                 </TouchableOpacity>
                             );
                         })}
