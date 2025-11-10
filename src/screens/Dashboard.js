@@ -186,11 +186,11 @@ const DashboardScreen = () => {
                 <View style={styles.headerLeft}>
                     <Text style={styles.headerTitle}>Monitor Mate</Text>
                 </View>
-                {/* <TouchableOpacity onPress={navigateToSettings} style={styles.profileIconContainer}>
+                <TouchableOpacity onPress={navigateToSettings} style={styles.profileIconContainer}>
                     <View style={styles.profileIcon}>
                         <Text style={styles.profileIconText}>👤</Text>
                     </View>
-                </TouchableOpacity> */}
+                </TouchableOpacity>
             </View>
 
             {/* Usage Permission Prompt */}
