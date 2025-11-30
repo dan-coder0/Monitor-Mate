@@ -178,7 +178,9 @@ export class PermissionService {
         let lowRiskCount = 0;
         const riskFactors = [];
 
-        permissions.forEach(permission => {
+        const uniquePermissions = [...new Set(permissions)];
+
+        uniquePermissions.forEach(permission => {
             const risk = this.PERMISSION_RISKS[permission];
             if (risk) {
                 riskFactors.push({

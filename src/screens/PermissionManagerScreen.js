@@ -66,7 +66,7 @@ const PermissionManagerScreen = () => {
                         {getRiskLabel(item.riskAnalysis?.riskLevel)}
                     </Text>
                     <Text style={styles.permissionCount}>
-                        {item.permissions?.length || 0} permissions
+                        {[...new Set(item.permissions || [])].length} permissions
                     </Text>
                 </View>
             </View>
@@ -198,7 +198,7 @@ const PermissionManagerScreen = () => {
                         </View>
                     )}
 
-                    <Text style={styles.sectionTitle}>Permissions ({selectedApp.permissions?.length || 0})</Text>
+                    <Text style={styles.sectionTitle}>Permissions ({[...new Set(selectedApp.permissions || [])].length})</Text>
                     <FlatList
                         data={permissionAnalysis?.permissionDetails || []}
                         renderItem={renderPermission}

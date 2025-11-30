@@ -102,11 +102,10 @@ const DataUsageScreen = () => {
     };
 
     const getRiskLevel = (app) => {
-        const permissionsCount = app.permissions ? app.permissions.length : 0;
-        const hasHighRiskPermissions = app.permissions && (
-            app.permissions.includes('CAMERA') &&
-            app.permissions.includes('LOCATION') &&
-            app.permissions.includes('CONTACTS')
+        const uniquePermissions = [...new Set(app.permissions || [])];
+        const permissionsCount = uniquePermissions.length;
+        const hasHighRiskPermissions = uniquePermissions.some(perm =>
+            perm === 'CAMERA' || perm === 'LOCATION' || perm === 'CONTACTS'
         );
 
         if (hasHighRiskPermissions || permissionsCount >= 5) {

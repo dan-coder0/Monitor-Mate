@@ -16,6 +16,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import NotificationService from '../services/NotificationService';
+import PDFReportService from '../services/PDFReportService';
+import { AppDataService } from '../services/AppDataService';
+import FileViewer from 'react-native-file-viewer';
 
 // Components defined outside to avoid re-renders
 const SettingItem = ({ title, subtitle, value, onToggle, type = 'switch' }) => (
@@ -205,7 +208,7 @@ const SettingsScreen = () => {
 
     const handleAbout = () => {
         Alert.alert(
-            'About Mobile Monitor',
+            'About Monitor Mate',
             'App Privacy Scanner v1.0.0\n\n' +
             '🛡️ Protecting your privacy by analyzing app permissions and data usage patterns.\n\n' +
             '📱 Features:\n' +
@@ -233,37 +236,130 @@ const SettingsScreen = () => {
     };
 
     const handleDataExport = async () => {
-        try {
-            // Get app data for export
-            const appData = await AsyncStorage.getItem('appSettings');
-            const scanData = await AsyncStorage.getItem('scanResults') || '{}';
-            const exportData = {
-                settings: JSON.parse(appData || '{}'),
-                scanResults: JSON.parse(scanData),
-                exportDate: new Date().toISOString(),
-                appVersion: '1.0.0',
-            };
+        Alert.alert(
+            'Export Data',
+            'Choose export format:',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'PDF Report',
+                    onPress: async () => {
+                        try {
+                            showAlert('Generating Report', 'Please wait while we generate your PDF report...');
+                            const appDataService = new AppDataService();
+                            let apps = [];
+                            try {
+                                apps = await appDataService.getInstalledApps();
+                            } catch (error) {
+                                const storedApps = await AsyncStorage.getItem('installedApps');
+                                if (storedApps) {
+                                    apps = JSON.parse(storedApps);
+                                }
+                            }
+                            const result = await PDFReportService.generateReport(apps);
+                            const filePath = result.filePath;
+                            Alert.alert(
+                                'Report Generated Successfully!',
+                                `Pages: ${result.numberOfPages || 'Multiple'}`,
+                                [
+                                    {
+                                        text: 'Open PDF',
+                                        onPress: async () => {
+                                            try {
+                                                await FileViewer.open(filePath, {
+                                                    showOpenWithDialog: true,
+                                                    showAppsSuggestions: true,
+                                                    displayName: 'Monitor Mate Security Report',
+                                                });
+                                            } catch (error) {
+                                                console.log('FileViewer error:', error);
+                                                if (error.message && error.message.includes('No app')) {
+                                                    showAlert(
+                                                        'No PDF Reader Found',
+                                                        'Please install a PDF reader app (like Adobe Acrobat Reader or Google PDF Viewer) to view the report.\n\nYou can find the file at:\n' + filePath
+                                                    );
+                                                } else {
+                                                    showAlert(
+                                                        'Cannot Open PDF',
+                                                        'The PDF was saved successfully but cannot be opened automatically.\n\nPlease open it manually from:\n' + filePath
+                                                    );
+                                                }
+                                            }
+                                        },
+                                    },
+                                    // {
+                                    //     text: 'Share',
+                                    //     onPress: async () => {
+                                    //         try {
+                                    //             if (Platform.OS === 'android') {
+                                    //                 await Share.share({
+                                    //                     title: 'Monitor Mate Security Report',
+                                    //                     message: 'Check out my Monitor Mate security report',
+                                    //                     url: `file://${filePath}`,
+                                    //                 });
+                                    //             } else {
+                                    //                 await Share.share({
+                                    //                     title: 'Monitor Mate Security Report',
+                                    //                     url: filePath,
+                                    //                 });
+                                    //             }
+                                    //         } catch (error) {
+                                    //             console.log('Share error:', error);
+                                    //             showAlert('Share Failed', 'Unable to share the PDF. You can find it in your Downloads folder at:\n' + filePath);
+                                    //         }
+                                    //     },
+                                    // },
+                                    {
+                                        text: 'OK',
+                                        style: 'cancel',
+                                    },
+                                ]
+                            );
+                        } catch (error) {
+                            showAlert('Export Failed', `Unable to generate PDF report: ${error.message}`);
+                        }
+                    },
+                },
+//                 {
+//                     text: 'Text Format',
+//                     onPress: async () => {
+//                         try {
+//                             // Get app data for export
+//                             const appData = await AsyncStorage.getItem('appSettings');
+//                             const scanData = await AsyncStorage.getItem('scanResults') || '{}';
+//                             const exportData = {
+//                                 settings: JSON.parse(appData || '{}'),
+//                                 scanResults: JSON.parse(scanData),
+//                                 exportDate: new Date().toISOString(),
+//                                 appVersion: '1.0.0',
+//                             };
 
-            const exportText = `Mobile Monitor Data Export
-Generated: ${new Date().toLocaleDateString()}
+//                             const exportText = `Monitor Mate Data Export
+// Generated: ${new Date().toLocaleDateString()}
 
-Settings:
-${JSON.stringify(exportData.settings, null, 2)}
+// Settings:
+// ${JSON.stringify(exportData.settings, null, 2)}
 
-Scan Results:
-${JSON.stringify(exportData.scanResults, null, 2)}
+// Scan Results:
+// ${JSON.stringify(exportData.scanResults, null, 2)}
 
-This data was exported from Mobile Monitor v${exportData.appVersion}`;
+// This data was exported from Monitor Mate v${exportData.appVersion}`;
 
-            // Share the data
-            await Share.share({
-                message: exportText,
-                title: 'Mobile Monitor Data Export',
-            });
-
-        } catch (error) {
-            showAlert('Export Failed', 'Unable to export your data. Please try again.');
-        }
+//                             // Share the data
+//                             await Share.share({
+//                                 message: exportText,
+//                                 title: 'Monitor Mate Data Export',
+//                             });
+//                         } catch (error) {
+//                             showAlert('Export Failed', 'Unable to export your data. Please try again.');
+//                         }
+//                     },
+//                 },
+            ]
+        );
     };
 
     const handleResetSettings = () => {

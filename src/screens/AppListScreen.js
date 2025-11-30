@@ -232,7 +232,7 @@ const AppListScreen = ({ route }) => {
                     {item.riskLevel}
                 </Text>
                 <Text style={styles.permissionCount}>
-                    {item.permissions?.length || 0} permissions
+                    {[...new Set(item.permissions || [])].length} permissions
                 </Text>
             </View>
         </TouchableOpacity>

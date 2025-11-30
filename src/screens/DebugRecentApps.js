@@ -113,7 +113,7 @@ const DebugRecentApps = () => {
                         <Text>Package: {app.packageName}</Text>
                         <Text>Last Time Used: {formatTimestamp(app.lastTimeUsed)}</Text>
                         <Text>First Install: {formatTimestamp(app.firstInstallTime)}</Text>
-                        <Text>Permissions: {app.permissions ? app.permissions.length : 0}</Text>
+                        <Text>Permissions: {[...new Set(app.permissions || [])].length}</Text>
                     </View>
                 ))}
             </View>
