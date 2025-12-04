@@ -1,5 +1,5 @@
 {
-  "name": "MobileMonitor",
+  "name": "monitor-mate",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,8 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "setup": "node setup.js",
-    "postinstall": "cd ios && pod install --repo-update || true"
+    "setup": "node setup.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
